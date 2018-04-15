@@ -7,7 +7,7 @@ RUN apt-get update && \
     virtualenv git python-pyaudio sox python3-dev build-essential python-dev \
     mpg321 git-core alsa-utils portaudio19-dev python3-pyaudio \
     swig3.0 libatlas-base-dev swig libpulse-dev python3-setuptools \
-    python3-setuptools python3-pip rpi.gpio
+    python3-setuptools python3-pip rpi.gpio cmake
 
 COPY lex/requirements.txt /rpi/
 RUN pip3 install --upgrade wheel setuptools pip
@@ -16,6 +16,14 @@ RUN pip3 install -r /rpi/requirements.txt
 RUN git clone https://github.com/leachj/vl6180_pi.git
 RUN make -C vl6180_pi
 RUN make install -C vl6180_pi
+
+RUN git clone https://github.com/lichtblau/vl53l0x-linux.git
+RUN cd vl53l0x-linux/build && \
+    cmake .. && make && make install && \
+    cp ../VL53L0X.hpp /usr/local/include/ && \
+    ldconfig
+COPY sensor /build/sensor
+RUN cd /build/sensor && make
 
 COPY lex /rpi/lex
 
